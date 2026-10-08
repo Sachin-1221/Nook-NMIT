@@ -39,24 +39,6 @@ const features = [
     title: "Owner-only edits",
     body: "Only you can edit or delete your listings. Every action is verified on the server.",
   },
-  {
-    icon: (
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="h-5 w-5"
-      >
-        <path d="M12 2v20" />
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-      </svg>
-    ),
-    title: "Live currency conversion",
-    body: "See prices in INR, USD, or EUR — updated in real time.",
-  },
 ];
 
 const steps = [
@@ -119,7 +101,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="mt-6 text-xs text-textMuted">
-            Free to use · Verified campus emails · Built by NMIT students
+            Free to use · Built by NMIT students · Open Library integration
           </p>
         </section>
 

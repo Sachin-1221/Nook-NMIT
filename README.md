@@ -69,3 +69,42 @@ See [ARCHITECTURE.md](./ARCHITECTURE.md).
 ## AI Usage
 
 See [AI_USAGE.md](./AI_USAGE.md).
+## Database Schema
+
+**User** — id, email (unique), name, passwordHash, createdAt, listings[]
+
+**Listing** — id, title, description, price, category, imageUrl, status (ACTIVE | SOLD), pickupLocation?, contact?, sellerId (FK → User, cascade), createdAt, updatedAt
+
+Indexes: `status`, `category`. One User → many Listings.
+
+## Backend Architecture
+src/app/api/
+├── auth/{register,login,logout,me}
+├── listings/route.ts GET (search/filter/sort), POST
+├── listings/[id]/route.ts GET, PATCH, DELETE (owner)
+├── listings/[id]/sold/route.ts PATCH (owner)
+├── external/books/route.ts GET — proxy Open Library
+└── stats/route.ts GET
+
+Auth: bcryptjs → JWT (jose) → httpOnly SameSite=Lax cookie → verified on every protected route. Zod validation on every request body. Server-side ownership: `listing.sellerId === session.userId`, else 401/403.
+
+## External API
+
+`GET /api/external/books?q=...` proxies `openlibrary.org/search.json`. Normalized to `{ title, author, year, coverUrl }`. Cached 1 hour. Returns 502 on upstream failure.
+
+## Seed Data
+
+Populate the database with sample users and listings:
+
+```bash
+npx prisma db seed
+```
+
+Sample login: `aarav@nmit.ac.in` / `password123`
+
+## Screenshots
+
+- Landing page
+- Browse page with filters
+- Listing detail with seller contact
+- Dashboard with owner actions
