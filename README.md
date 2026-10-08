@@ -2,7 +2,7 @@
 
 A full-stack peer-to-peer marketplace for NMIT students to buy and sell textbooks, electronics, lab gear, and campus essentials.
 
-**Live:** https://nook-nmit.vercel.app
+**Live:** https://nook-nmit-xit4.vercel.app
 
 ## Features
 
