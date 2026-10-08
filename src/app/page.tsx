@@ -182,17 +182,6 @@ export default function Home() {
         <footer className="mt-10 border-t border-white/10">
           <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-8 text-xs text-textMuted md:flex-row">
             <span>Nook NMIT · Built for NMIT students</span>
-            <div className="flex items-center gap-4">
-              <Link href="/privacy" className="hover:text-textPrimary">
-                Privacy
-              </Link>
-              <Link href="/terms" className="hover:text-textPrimary">
-                Terms
-              </Link>
-              <Link href="/refund" className="hover:text-textPrimary">
-                Refund
-              </Link>
-            </div>
             <span>© 2026</span>
           </div>
         </footer>
