@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { Prisma } from "@prisma/client";
 
 const createSchema = z.object({
   title: z.string().min(3).max(120),
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest) {
     const sort = searchParams.get("sort") ?? "newest";
     const sellerId = searchParams.get("sellerId") ?? "";
 
-    const where: any = {};
+    const where: Prisma.ListingWhereInput = {};
 
     if (search) {
       where.OR = [
@@ -40,15 +41,16 @@ export async function GET(req: NextRequest) {
     }
     if (category) where.category = category;
     if (sellerId) where.sellerId = sellerId;
-    if (status) where.status = status;
+    if (status === "ACTIVE" || status === "SOLD") {
+      where.status = status;
+    }
     if (minPrice || maxPrice) {
       where.price = {};
       if (minPrice) where.price.gte = Number(minPrice);
       if (maxPrice) where.price.lte = Number(maxPrice);
     }
 
-    const orderBy: any =
-      sort === "price-asc"
+    const orderBy: Prisma.ListingOrderByWithRelationInput =      sort === "price-asc"
         ? { price: "asc" }
         : sort === "price-desc"
         ? { price: "desc" }

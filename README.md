@@ -29,3 +29,43 @@ Next.js 14 · TypeScript · Tailwind · Prisma 6 · PostgreSQL (Neon) · bcryptj
 git clone https://github.com/Sachin-1221/Nook-NMIT.git
 cd Nook-NMIT
 npm install
+```
+
+Create `.env`:
+
+```
+DATABASE_URL="postgresql://..."
+JWT_SECRET="long-random-string"
+```
+
+Run:
+
+```bash
+npx prisma migrate deploy
+npx prisma generate
+npm run dev
+```
+
+Open http://localhost:3000.
+
+## API Routes
+
+| Route | Methods |
+|---|---|
+| `/api/auth/register` | POST |
+| `/api/auth/login` | POST |
+| `/api/auth/logout` | POST |
+| `/api/auth/me` | GET |
+| `/api/listings` | GET, POST |
+| `/api/listings/[id]` | GET, PATCH, DELETE |
+| `/api/listings/[id]/sold` | PATCH |
+| `/api/external/books` | GET |
+| `/api/stats` | GET |
+
+## Architecture
+
+See [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+## AI Usage
+
+See [AI_USAGE.md](./AI_USAGE.md).

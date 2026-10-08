@@ -43,8 +43,9 @@ export default function ListingsPage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "Failed to load");
         if (!cancelled) setListings(data.listings);
-      } catch (e: any) {
-        if (!cancelled) setError(e.message || "Something went wrong");
+      } catch (e: unknown) {
+        if (!cancelled)
+          setError(e instanceof Error ? e.message : "Something went wrong");
       } finally {
         if (!cancelled) setLoading(false);
       }

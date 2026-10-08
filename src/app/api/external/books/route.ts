@@ -1,4 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
+export const dynamic = "force-dynamic"; 
+type OpenLibraryDoc = {
+  title?: string;
+  author_name?: string[];
+  first_publish_year?: number;
+  cover_i?: number;
+};
 
 export async function GET(req: NextRequest) {
   try {
@@ -25,7 +32,7 @@ export async function GET(req: NextRequest) {
 
     const data = await res.json();
 
-    const books = (data.docs ?? []).map((d: any) => ({
+      const books = (data.docs ?? []).map((d: OpenLibraryDoc) => ({
       title: d.title ?? "Untitled",
       author: d.author_name?.[0] ?? "Unknown author",
       year: d.first_publish_year ?? null,
