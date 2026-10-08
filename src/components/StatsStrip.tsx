@@ -1,4 +1,4 @@
-"use client";
+	"use client";
 
 import { useEffect, useState } from "react";
 
@@ -17,7 +17,7 @@ export default function StatsStrip() {
   const items = [
     { n: stats ? `${stats.listings}` : "—", l: "Listings" },
     { n: stats ? `${stats.users}` : "—", l: "Students" },
-    { n: "6", l: "Categories" },
+    { n: "10+", l: "Categories" },
     { n: "0%", l: "Fees" },
   ];
 

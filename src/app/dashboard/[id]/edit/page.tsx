@@ -6,7 +6,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 const CATEGORIES = [
-  "All",           // ← only in listings/page.tsx
   "Textbooks",
   "Electronics",
   "Lab gear",
@@ -28,6 +27,7 @@ type Listing = {
   category: string;
   imageUrl: string;
   pickupLocation: string | null;
+  contact: string | null;
   seller: { id: string };
 };
 
@@ -36,6 +36,7 @@ export default function EditListingPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [notAllowed, setNotAllowed] = useState(false);
   const [form, setForm] = useState({
@@ -45,6 +46,7 @@ export default function EditListingPage() {
     category: "Textbooks",
     imageUrl: "",
     pickupLocation: "",
+    contact: "",
   });
 
   useEffect(() => {
@@ -69,11 +71,33 @@ export default function EditListingPage() {
           category: listing.category,
           imageUrl: listing.imageUrl,
           pickupLocation: listing.pickupLocation ?? "",
+          contact: listing.contact ?? "",
         });
       })
       .catch(() => setError("Failed to load listing"))
       .finally(() => setLoading(false));
   }, [params.id]);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    if (file.size > 500 * 1024) {
+      setError("Image must be under 500 KB. Try compressing it.");
+      return;
+    }
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((f) => ({ ...f, imageUrl: reader.result as string }));
+      setUploading(false);
+    };
+    reader.onerror = () => {
+      setError("Could not read the file.");
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,6 +111,7 @@ export default function EditListingPage() {
           ...form,
           price: Number(form.price),
           pickupLocation: form.pickupLocation || undefined,
+          contact: form.contact || undefined,
         }),
       });
       const data = await res.json();
@@ -243,14 +268,48 @@ export default function EditListingPage() {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium">Image URL *</label>
-              <input
-                type="url"
-                required
-                value={form.imageUrl}
-                onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-              />
+              <label className="text-sm font-medium">Image *</label>
+              <div className="flex flex-wrap gap-2">
+                <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm transition-colors hover:bg-white/5">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-4 w-4"
+                  >
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                  <span>{uploading ? "Reading..." : "Choose file"}</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleFile}
+                    className="hidden"
+                  />
+                </label>
+                <input
+                  type="url"
+                  value={form.imageUrl.startsWith("data:") ? "" : form.imageUrl}
+                  onChange={(e) =>
+                    setForm({ ...form, imageUrl: e.target.value })
+                  }
+                  className="flex-1 rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  placeholder="Or paste an image URL"
+                />
+              </div>
+              {form.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={form.imageUrl}
+                  alt=""
+                  className="mt-2 h-24 w-24 rounded-lg border border-white/10 object-cover"
+                />
+              )}
             </div>
 
             <div className="flex flex-col gap-1.5">
@@ -265,6 +324,20 @@ export default function EditListingPage() {
                   setForm({ ...form, pickupLocation: e.target.value })
                 }
                 className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium">
+                Contact info (optional)
+              </label>
+              <input
+                type="text"
+                maxLength={120}
+                value={form.contact}
+                onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                placeholder="WhatsApp +91 98765 43210 or email"
               />
             </div>
 

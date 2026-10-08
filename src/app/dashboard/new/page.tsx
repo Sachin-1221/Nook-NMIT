@@ -6,7 +6,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 
 const CATEGORIES = [
-  "All",           // ← only in listings/page.tsx
   "Textbooks",
   "Electronics",
   "Lab gear",
@@ -36,13 +35,36 @@ export default function NewListingPage() {
     category: "Textbooks",
     imageUrl: "",
     pickupLocation: "",
+    contact: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const [bookQuery, setBookQuery] = useState("");
   const [books, setBooks] = useState<BookResult[]>([]);
   const [searching, setSearching] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError("");
+    if (file.size > 500 * 1024) {
+      setError("Image must be under 500 KB. Try compressing it.");
+      return;
+    }
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((f) => ({ ...f, imageUrl: reader.result as string }));
+      setUploading(false);
+    };
+    reader.onerror = () => {
+      setError("Could not read the file.");
+      setUploading(false);
+    };
+    reader.readAsDataURL(file);
+  }
 
   async function searchBooks() {
     if (bookQuery.trim().length < 2) return;
@@ -75,6 +97,10 @@ export default function NewListingPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!form.imageUrl) {
+      setError("Please upload an image or paste an image URL.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await fetch("/api/listings", {
@@ -84,6 +110,7 @@ export default function NewListingPage() {
           ...form,
           price: Number(form.price),
           pickupLocation: form.pickupLocation || undefined,
+          contact: form.contact || undefined,
         }),
       });
       const data = await res.json();
@@ -114,16 +141,13 @@ export default function NewListingPage() {
           </Link>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">
-              List an item
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">List an item</h1>
             <p className="mt-1 text-sm text-textMuted">
               It takes less than a minute.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-            {/* Form */}
             <form
               onSubmit={onSubmit}
               className="flex flex-col gap-5 lg:col-span-2"
@@ -173,7 +197,9 @@ export default function NewListingPage() {
                     min={1}
                     step="0.01"
                     value={form.price}
-                    onChange={(e) => setForm({ ...form, price: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, price: e.target.value })
+                    }
                     className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary placeholder:text-textMuted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
                     placeholder="450"
                   />
@@ -197,20 +223,51 @@ export default function NewListingPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium">Image URL *</label>
-                <input
-                  type="url"
-                  required
-                  value={form.imageUrl}
-                  onChange={(e) =>
-                    setForm({ ...form, imageUrl: e.target.value })
-                  }
-                  className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary placeholder:text-textMuted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
-                  placeholder="https://..."
-                />
+                <label className="text-sm font-medium">Image *</label>
+                <div className="flex flex-wrap gap-2">
+                  <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm transition-colors hover:bg-white/5">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="h-4 w-4"
+                    >
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="17 8 12 3 7 8" />
+                      <line x1="12" y1="3" x2="12" y2="15" />
+                    </svg>
+                    <span>{uploading ? "Reading..." : "Choose file"}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFile}
+                      className="hidden"
+                    />
+                  </label>
+                  <input
+                    type="url"
+                    value={form.imageUrl.startsWith("data:") ? "" : form.imageUrl}
+                    onChange={(e) =>
+                      setForm({ ...form, imageUrl: e.target.value })
+                    }
+                    className="flex-1 rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary placeholder:text-textMuted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                    placeholder="Or paste an image URL"
+                  />
+                </div>
                 <p className="text-xs text-textMuted">
-                  Use the Open Library search on the right, or paste any image URL.
+                  Upload a file (max 500 KB) or paste an image URL.
                 </p>
+                {form.imageUrl && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={form.imageUrl}
+                    alt=""
+                    className="mt-2 h-24 w-24 rounded-lg border border-white/10 object-cover"
+                  />
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -229,6 +286,23 @@ export default function NewListingPage() {
                 />
               </div>
 
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium">
+                  Contact info (optional)
+                </label>
+                <input
+                  type="text"
+                  maxLength={120}
+                  value={form.contact}
+                  onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                  className="rounded-lg border border-white/10 bg-surface px-3.5 py-2.5 text-sm text-textPrimary placeholder:text-textMuted focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+                  placeholder="WhatsApp +91 98765 43210 or email"
+                />
+                <p className="text-xs text-textMuted">
+                  Buyers will see this when they view your listing.
+                </p>
+              </div>
+
               <button
                 type="submit"
                 disabled={loading}
@@ -238,13 +312,10 @@ export default function NewListingPage() {
               </button>
             </form>
 
-            {/* Sidebar: Open Library + Preview */}
             <div className="flex flex-col gap-6">
               <div className="rounded-xl border border-white/10 bg-surface p-5">
-                <div className="mb-3 flex items-center gap-2">
-                  <span className="text-sm font-semibold">
-                    Search Open Library
-                  </span>
+                <div className="mb-3 text-sm font-semibold">
+                  Search Open Library
                 </div>
                 <p className="mb-3 text-xs text-textMuted">
                   Type a book title or author to autofill.
@@ -273,18 +344,7 @@ export default function NewListingPage() {
                   </button>
                 </div>
 
-                {searching && (
-                  <div className="mt-3 space-y-2">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="h-12 animate-pulse rounded-lg bg-white/5"
-                      />
-                    ))}
-                  </div>
-                )}
-
-                {!searching && books.length > 0 && (
+                {books.length > 0 && (
                   <ul className="mt-3 space-y-1.5">
                     {books.map((b, i) => (
                       <li key={i}>
@@ -317,15 +377,8 @@ export default function NewListingPage() {
                     ))}
                   </ul>
                 )}
-
-                {!searching && books.length === 0 && bookQuery.length > 1 && (
-                  <p className="mt-3 text-xs text-textMuted">
-                    No results yet. Try another query.
-                  </p>
-                )}
               </div>
 
-              {/* Live preview */}
               <div className="rounded-xl border border-white/10 bg-surface p-5">
                 <div className="mb-3 text-sm font-semibold">Live preview</div>
                 <div className="overflow-hidden rounded-lg border border-white/10 bg-background">
