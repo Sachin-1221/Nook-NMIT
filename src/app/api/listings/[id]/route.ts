@@ -8,8 +8,16 @@ const updateSchema = z.object({
   description: z.string().min(10).max(2000).optional(),
   price: z.number().positive().max(1000000).optional(),
   category: z.string().min(2).max(40).optional(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z
+    .string()
+    .min(1)
+    .refine(
+      (v) => v.startsWith("http") || v.startsWith("data:image/"),
+      "Image must be a URL or an uploaded file"
+    )
+    .optional(),
   pickupLocation: z.string().max(80).optional(),
+  contact: z.string().max(120).optional(),
 });
 
 export async function GET(

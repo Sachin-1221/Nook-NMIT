@@ -8,8 +8,15 @@ const createSchema = z.object({
   description: z.string().min(10).max(2000),
   price: z.number().positive().max(1000000),
   category: z.string().min(2).max(40),
-  imageUrl: z.string().url(),
+  imageUrl: z
+    .string()
+    .min(1)
+    .refine(
+      (v) => v.startsWith("http") || v.startsWith("data:image/"),
+      "Image must be a URL or an uploaded file"
+    ),
   pickupLocation: z.string().max(80).optional(),
+  contact: z.string().max(120).optional(),
 });
 
 export async function GET(req: NextRequest) {
@@ -21,6 +28,7 @@ export async function GET(req: NextRequest) {
     const minPrice = searchParams.get("minPrice");
     const maxPrice = searchParams.get("maxPrice");
     const sort = searchParams.get("sort") ?? "newest";
+    const sellerId = searchParams.get("sellerId") ?? "";
 
     const where: any = {};
 
@@ -31,6 +39,7 @@ export async function GET(req: NextRequest) {
       ];
     }
     if (category) where.category = category;
+    if (sellerId) where.sellerId = sellerId;
     if (status) where.status = status;
     if (minPrice || maxPrice) {
       where.price = {};

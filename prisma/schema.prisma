@@ -25,6 +25,7 @@ model Listing {
   imageUrl       String
   status         ListingStatus @default(ACTIVE)
   pickupLocation String?
+  contact        String?
   sellerId       String
   seller         User          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt      DateTime      @default(now())
