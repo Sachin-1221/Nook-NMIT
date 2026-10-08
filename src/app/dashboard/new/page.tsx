@@ -261,12 +261,21 @@ export default function NewListingPage() {
                   Upload a file (max 500 KB) or paste an image URL.
                 </p>
                 {form.imageUrl && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={form.imageUrl}
-                    alt=""
-                    className="mt-2 h-24 w-24 rounded-lg border border-white/10 object-cover"
-                  />
+                  <div className="mt-2 flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.imageUrl}
+                      alt=""
+                      className="h-24 w-24 rounded-lg border border-white/10 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setForm({ ...form, imageUrl: "" })}
+                      className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20"
+                    >
+                      Remove image
+                    </button>
+                  </div>
                 )}
               </div>
 
