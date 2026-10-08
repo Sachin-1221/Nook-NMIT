@@ -15,6 +15,7 @@ type Listing = {
   imageUrl: string;
   status: "ACTIVE" | "SOLD";
   pickupLocation: string | null;
+  contact: string | null;
   createdAt: string;
   seller: { id: string; name: string };
 };
@@ -186,16 +187,23 @@ export default function ListingDetailPage() {
                 ) : (
                   <div className="mt-8 border-t border-white/10 pt-6">
                     <p className="mb-3 text-xs text-textMuted">
-                      Contact the seller on campus to arrange pickup.
+                      Contact the seller to arrange pickup on campus.
                     </p>
-                    <a
-                      href={`mailto:?subject=Interested in your listing: ${encodeURIComponent(
-                        listing.title
-                      )}`}
-                      className="inline-block rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accentHover"
-                    >
-                      Message seller
-                    </a>
+                    {listing.contact ? (
+                      <div className="rounded-lg border border-violet-500/30 bg-accentSoft p-4">
+                        <div className="text-xs font-medium uppercase tracking-wider text-violet-300">
+                          Contact seller
+                        </div>
+                        <div className="mt-1.5 select-all font-mono text-sm text-textPrimary">
+                          {listing.contact}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-sm text-textMuted">
+                        This seller has not added contact details. Show them
+                        this listing when you meet on campus.
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
